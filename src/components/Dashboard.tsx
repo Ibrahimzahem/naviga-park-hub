@@ -9,6 +9,9 @@ import logo from "@/assets/logo.png";
 import ksuLogo from "@/assets/ksu-logo.png";
 import expoLogo from "@/assets/expo-logo.png";
 import hospitalLogo from "@/assets/hospital-logo.png";
+import bookFairLogo from "@/assets/book-fair-logo.png";
+import mallLogo from "@/assets/mall-logo.png";
+import courtLogo from "@/assets/court-logo.png";
 
 interface DashboardProps {
   userId: string;
@@ -46,12 +49,45 @@ const entities = [
     availableSpots: 23,
     description: "مركز طبي متخصص في الرعاية الصحية المتقدمة",
   },
+  {
+    id: "book-fair",
+    name: "معرض الكتاب",
+    nameEn: "Book Fair",
+    logo: bookFairLogo,
+    location: "الرياض، المملكة العربية السعودية",
+    parkingSpots: 320,
+    availableSpots: 145,
+    description: "معرض الكتاب الدولي ومركز الفعاليات الثقافية",
+  },
+  {
+    id: "mall",
+    name: "النخيل مول",
+    nameEn: "Al Nakheel Mall",
+    logo: mallLogo,
+    location: "الرياض، المملكة العربية السعودية",
+    parkingSpots: 800,
+    availableSpots: 234,
+    description: "مركز تسوق متكامل ومجمع ترفيهي حديث",
+  },
+  {
+    id: "court",
+    name: "المحكمة العامة",
+    nameEn: "General Court",
+    logo: courtLogo,
+    location: "الرياض، المملكة العربية السعودية",
+    parkingSpots: 150,
+    availableSpots: 67,
+    description: "مجمع المحاكم العامة ومرافق العدالة",
+  },
 ];
 
 export const Dashboard = ({ userId, onLogout }: DashboardProps) => {
   const [selectedEntity, setSelectedEntity] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<"overview" | "appointments" | "entities" | "services">("overview");
   const selectedEntityData = entities.find(e => e.id === selectedEntity);
+  
+  // Calculate total available spots dynamically
+  const totalAvailableSpots = entities.reduce((total, entity) => total + entity.availableSpots, 0);
 
   if (selectedEntity && selectedEntityData) {
     return (
@@ -208,7 +244,7 @@ export const Dashboard = ({ userId, onLogout }: DashboardProps) => {
                 <h3 className="font-semibold mb-4">إحصائيات سريعة</h3>
                 <div className="grid grid-cols-2 gap-4">
                   <div className="text-center p-3 bg-primary/10 rounded-lg">
-                    <p className="text-2xl font-bold text-primary">268</p>
+                    <p className="text-2xl font-bold text-primary">{totalAvailableSpots}</p>
                     <p className="text-xs text-muted-foreground">مواقف متاحة</p>
                   </div>
                   <div className="text-center p-3 bg-nafath/10 rounded-lg">

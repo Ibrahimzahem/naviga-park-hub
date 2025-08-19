@@ -109,6 +109,96 @@ const entityServices: EntityService[] = [
         icon: <Phone className="h-5 w-5" />
       }
     ]
+  },
+  {
+    entityId: "book-fair",
+    entityName: "معرض الكتاب",
+    services: [
+      {
+        id: "tickets",
+        name: "حجز التذاكر",
+        description: "حجز تذاكر دخول المعرض",
+        duration: "يوم كامل",
+        availability: "available",
+        icon: <Calendar className="h-5 w-5" />
+      },
+      {
+        id: "tours",
+        name: "جولات مصحوبة",
+        description: "جولات ثقافية مع مرشد متخصص",
+        duration: "90 دقيقة",
+        availability: "limited",
+        icon: <Users className="h-5 w-5" />
+      },
+      {
+        id: "workshops",
+        name: "ورش العمل",
+        description: "ورش تدريبية في الكتابة والنشر",
+        duration: "3 ساعات",
+        availability: "available",
+        icon: <FileText className="h-5 w-5" />
+      }
+    ]
+  },
+  {
+    entityId: "mall",
+    entityName: "النخيل مول",
+    services: [
+      {
+        id: "shopping",
+        name: "خدمات التسوق",
+        description: "مساعدة في التسوق والإرشاد للمتاجر",
+        duration: "حسب الحاجة",
+        availability: "available",
+        icon: <MapPin className="h-5 w-5" />
+      },
+      {
+        id: "dining",
+        name: "حجز المطاعم",
+        description: "حجز طاولات في المطاعم والمقاهي",
+        duration: "2-3 ساعات",
+        availability: "available",
+        icon: <Clock className="h-5 w-5" />
+      },
+      {
+        id: "entertainment",
+        name: "الترفيه",
+        description: "حجز صالات الألعاب والسينما",
+        duration: "2-4 ساعات",
+        availability: "limited",
+        icon: <Calendar className="h-5 w-5" />
+      }
+    ]
+  },
+  {
+    entityId: "court",
+    entityName: "المحكمة العامة",
+    services: [
+      {
+        id: "appointments",
+        name: "حجز المواعيد",
+        description: "حجز موعد للمراجعات والاستشارات القانونية",
+        duration: "60 دقيقة",
+        availability: "available",
+        icon: <Calendar className="h-5 w-5" />
+      },
+      {
+        id: "documents",
+        name: "الوثائق والأوراق",
+        description: "خدمات إصدار وتوثيق الوثائق",
+        duration: "30-45 دقيقة",
+        availability: "available",
+        icon: <FileText className="h-5 w-5" />
+      },
+      {
+        id: "legal-aid",
+        name: "المساعدة القانونية",
+        description: "استشارات قانونية مجانية",
+        duration: "45 دقيقة",
+        availability: "limited",
+        icon: <Phone className="h-5 w-5" />
+      }
+    ]
   }
 ];
 
