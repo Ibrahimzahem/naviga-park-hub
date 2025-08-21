@@ -15,6 +15,14 @@ interface ParkingSpot {
 
 interface ParkingMapProps {
   entityId: string;
+  currentEntries?: Array<{
+    id: string;
+    entityId: string;
+    spotNumber: string;
+    level: string;
+    zone: string;
+    status: "active" | "completed";
+  }>;
 }
 
 // Mock parking data
@@ -47,7 +55,7 @@ const generateParkingSpots = (entityId: string): ParkingSpot[] => {
   return spots;
 };
 
-export const ParkingMap = ({ entityId }: ParkingMapProps) => {
+export const ParkingMap = ({ entityId, currentEntries = [] }: ParkingMapProps) => {
   const [selectedLevel, setSelectedLevel] = useState(1);
   const [selectedSpot, setSelectedSpot] = useState<ParkingSpot | null>(null);
   

@@ -4,7 +4,8 @@ import { EntityCard } from "./EntityCard";
 import { ParkingMap } from "./ParkingMap";
 import { AppointmentsSection } from "./AppointmentsSection";
 import { ServicesSection } from "./ServicesSection";
-import { LogOut, Building2, Car, Calendar, Users } from "lucide-react";
+import { SmartGateSimulator } from "./SmartGateSimulator";
+import { LogOut, Building2, Car, Calendar, Users, Zap } from "lucide-react";
 import logo from "@/assets/logo.png";
 import ksuLogo from "@/assets/ksu-logo.png";
 import expoLogo from "@/assets/expo-logo.png";
@@ -50,7 +51,7 @@ const entities = [
 
 export const Dashboard = ({ userId, onLogout }: DashboardProps) => {
   const [selectedEntity, setSelectedEntity] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<"overview" | "appointments" | "entities" | "services">("overview");
+  const [activeTab, setActiveTab] = useState<"overview" | "appointments" | "entities" | "services" | "smart-gate">("overview");
   const selectedEntityData = entities.find(e => e.id === selectedEntity);
 
   if (selectedEntity && selectedEntityData) {
@@ -195,6 +196,14 @@ export const Dashboard = ({ userId, onLogout }: DashboardProps) => {
               <Users className="h-4 w-4" />
               الخدمات
             </Button>
+            <Button
+              variant={activeTab === "smart-gate" ? "default" : "ghost"}
+              onClick={() => setActiveTab("smart-gate")}
+              className="flex items-center gap-2"
+            >
+              <Zap className="h-4 w-4" />
+              البوابة الذكية
+            </Button>
           </div>
         </div>
       </div>
@@ -263,6 +272,10 @@ export const Dashboard = ({ userId, onLogout }: DashboardProps) => {
 
         {activeTab === "services" && (
           <ServicesSection />
+        )}
+
+        {activeTab === "smart-gate" && (
+          <SmartGateSimulator />
         )}
       </div>
     </div>
