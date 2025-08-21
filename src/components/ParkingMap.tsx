@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Car, Users, MapPin, Navigation } from "lucide-react";
+import { Car, Users, MapPin, Navigation, X } from "lucide-react";
 
 interface ParkingSpot {
   id: string;
@@ -63,36 +63,53 @@ export const ParkingMap = ({ entityId, currentEntries = [] }: ParkingMapProps) =
   const levels = [...new Set(parkingSpots.map(spot => spot.level))];
   const currentLevelSpots = parkingSpots.filter(spot => spot.level === selectedLevel);
   
-  const getSpotColor = (spot: ParkingSpot) => {
-    if (spot.type === "disabled") {
-      return spot.status === "available" ? "bg-parking-disabled" : "bg-destructive";
-    }
-    switch (spot.status) {
-      case "available": return "bg-parking-available";
-      case "occupied": return "bg-parking-occupied";
-      case "reserved": return "bg-warning";
-      default: return "bg-muted";
-    }
+  // Check if spot is occupied by current entries
+  const isSpotOccupied = (spotNumber: string) => {
+    return currentEntries.some(entry => 
+      entry.entityId === entityId && 
+      entry.spotNumber === spotNumber && 
+      entry.status === "active"
+    );
   };
 
-  const getSpotIcon = (spot: ParkingSpot) => {
+  const getSpotColor = (spot: ParkingSpot) => {
+    const occupied = isSpotOccupied(spot.number);
+    
     if (spot.type === "disabled") {
-      return <Users className="h-3 w-3 text-white" />;
+      return occupied ? "bg-red-500" : "bg-blue-500";
     }
-    return <Car className="h-3 w-3 text-white" />;
+    
+    return occupied ? "bg-red-500" : "bg-green-500";
   };
 
   const handleSpotClick = (spot: ParkingSpot) => {
     setSelectedSpot(spot);
   };
 
+  const handleCancelSpot = (spotNumber: string, event: React.MouseEvent) => {
+    event.stopPropagation();
+    // This would normally communicate with the gate simulator to release the spot
+    window.dispatchEvent(new CustomEvent('releaseSpot', { detail: spotNumber }));
+  };
+
   const handleReserveSpot = () => {
-    if (selectedSpot && selectedSpot.status === "available") {
-      // Here would be the reservation logic
+    if (selectedSpot && !isSpotOccupied(selectedSpot.number)) {
       alert(`تم حجز الموقف ${selectedSpot.number} بنجاح!`);
       setSelectedSpot(null);
     }
   };
+
+  // Group spots by zones for realistic layout
+  const groupSpotsByZone = (spots: ParkingSpot[]) => {
+    const zones: { [key: string]: ParkingSpot[] } = {};
+    spots.forEach(spot => {
+      if (!zones[spot.zone]) zones[spot.zone] = [];
+      zones[spot.zone].push(spot);
+    });
+    return zones;
+  };
+
+  const zoneGroups = groupSpotsByZone(currentLevelSpots);
 
   return (
     <div className="space-y-4">
@@ -131,35 +148,123 @@ export const ParkingMap = ({ entityId, currentEntries = [] }: ParkingMapProps) =
         </div>
       </div>
 
-      {/* Parking Grid */}
-      <div className="relative bg-accent/20 rounded-lg p-6 min-h-[400px]">
-        <div className="absolute top-4 left-4 flex items-center gap-2 text-sm text-muted-foreground">
+      {/* Realistic Parking Layout */}
+      <div className="relative bg-gray-600 rounded-lg p-8 min-h-[600px]">
+        <div className="absolute top-4 left-4 flex items-center gap-2 text-sm text-white">
           <MapPin className="h-4 w-4" />
           الطابق {selectedLevel}
         </div>
         
-        <div className="grid grid-cols-10 gap-2 mt-8">
-          {currentLevelSpots.map((spot) => (
-            <div
-              key={spot.id}
-              onClick={() => handleSpotClick(spot)}
-              className={`
-                aspect-square rounded cursor-pointer transition-all duration-200 
-                hover:scale-105 hover:shadow-md flex items-center justify-center
-                ${getSpotColor(spot)}
-                ${selectedSpot?.id === spot.id ? 'ring-2 ring-primary scale-105' : ''}
-              `}
-            >
-              {getSpotIcon(spot)}
+        {/* Parking Facility Layout */}
+        <div className="flex justify-between items-start mt-8 h-full">
+          {/* Left Side Parking Sections */}
+          <div className="space-y-6">
+            {Object.entries(zoneGroups).slice(0, 2).map(([zone, spots]) => (
+              <div key={zone} className="space-y-2">
+                <div className="text-white text-sm font-semibold text-center">منطقة {zone}</div>
+                <div className="grid grid-cols-10 gap-1">
+                  {spots.slice(0, 20).map((spot) => (
+                    <div key={spot.id} className="relative">
+                      <div
+                        onClick={() => handleSpotClick(spot)}
+                        className={`
+                          w-8 h-12 border border-gray-400 cursor-pointer transition-all duration-200 
+                          hover:scale-105 flex items-center justify-center text-xs text-white font-medium
+                          ${getSpotColor(spot)}
+                          ${selectedSpot?.id === spot.id ? 'ring-2 ring-yellow-400 scale-105' : ''}
+                        `}
+                      >
+                        {spot.type === "disabled" ? <Users className="h-3 w-3" /> : spot.number.slice(-2)}
+                      </div>
+                      {isSpotOccupied(spot.number) && (
+                        <button
+                          onClick={(e) => handleCancelSpot(spot.number, e)}
+                          className="absolute -top-2 -right-1 bg-white rounded-full p-1 shadow-lg hover:bg-gray-100"
+                        >
+                          <X className="h-3 w-3 text-red-500" />
+                        </button>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+          
+          {/* Center Road */}
+          <div className="flex flex-col items-center space-y-4 mx-8">
+            <div className="w-20 h-96 bg-gray-800 rounded relative flex flex-col justify-center">
+              {/* Road markings */}
+              <div className="absolute inset-0 flex flex-col justify-center space-y-4">
+                {[...Array(8)].map((_, i) => (
+                  <div key={i} className="w-1 h-8 bg-white mx-auto rounded"></div>
+                ))}
+              </div>
+              {/* Direction arrows */}
+              <div className="absolute top-10 left-1/2 transform -translate-x-1/2">
+                <Navigation className="h-6 w-6 text-white" />
+              </div>
+              <div className="absolute bottom-10 left-1/2 transform -translate-x-1/2 rotate-180">
+                <Navigation className="h-6 w-6 text-white" />
+              </div>
             </div>
-          ))}
+            
+            {/* Main Entrance */}
+            <div className="bg-yellow-500 px-4 py-2 rounded text-black font-semibold text-sm">
+              المدخل الرئيسي
+            </div>
+          </div>
+          
+          {/* Right Side Parking Sections */}
+          <div className="space-y-6">
+            {Object.entries(zoneGroups).slice(2, 4).map(([zone, spots]) => (
+              <div key={zone} className="space-y-2">
+                <div className="text-white text-sm font-semibold text-center">منطقة {zone}</div>
+                <div className="grid grid-cols-10 gap-1">
+                  {spots.slice(0, 20).map((spot) => (
+                    <div key={spot.id} className="relative">
+                      <div
+                        onClick={() => handleSpotClick(spot)}
+                        className={`
+                          w-8 h-12 border border-gray-400 cursor-pointer transition-all duration-200 
+                          hover:scale-105 flex items-center justify-center text-xs text-white font-medium
+                          ${getSpotColor(spot)}
+                          ${selectedSpot?.id === spot.id ? 'ring-2 ring-yellow-400 scale-105' : ''}
+                        `}
+                      >
+                        {spot.type === "disabled" ? <Users className="h-3 w-3" /> : spot.number.slice(-2)}
+                      </div>
+                      {isSpotOccupied(spot.number) && (
+                        <button
+                          onClick={(e) => handleCancelSpot(spot.number, e)}
+                          className="absolute -top-2 -right-1 bg-white rounded-full p-1 shadow-lg hover:bg-gray-100"
+                        >
+                          <X className="h-3 w-3 text-red-500" />
+                        </button>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
-
-        {/* Entrance/Exit indicators */}
-        <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2">
-          <div className="flex items-center gap-2 text-sm text-muted-foreground bg-background/80 px-3 py-1 rounded-full">
-            <Navigation className="h-4 w-4" />
-            المدخل الرئيسي
+        
+        {/* Legend */}
+        <div className="absolute bottom-4 right-4 bg-white/90 p-3 rounded-lg text-xs">
+          <div className="flex items-center gap-4">
+            <div className="flex items-center gap-1">
+              <div className="w-3 h-3 bg-green-500 rounded"></div>
+              <span>متاح</span>
+            </div>
+            <div className="flex items-center gap-1">
+              <div className="w-3 h-3 bg-red-500 rounded"></div>
+              <span>محجوز</span>
+            </div>
+            <div className="flex items-center gap-1">
+              <div className="w-3 h-3 bg-blue-500 rounded"></div>
+              <span>ذوي الاحتياجات</span>
+            </div>
           </div>
         </div>
       </div>

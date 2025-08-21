@@ -30,6 +30,26 @@ export const SmartGateSimulator = () => {
   const [gateStatus, setGateStatus] = useState<"closed" | "opening" | "open">("closed");
   const [isProcessing, setIsProcessing] = useState(false);
 
+  // Listen for spot release events from the parking map
+  useEffect(() => {
+    const handleReleaseSpot = (event: CustomEvent) => {
+      const spotNumber = event.detail;
+      setCurrentEntries(prev => 
+        prev.filter(entry => entry.spotNumber !== spotNumber)
+      );
+      toast({
+        title: "تم تحرير الموقف",
+        description: `الموقف ${spotNumber} أصبح متاحاً الآن`,
+        className: "bg-blue-50 border-blue-200"
+      });
+    };
+
+    window.addEventListener('releaseSpot', handleReleaseSpot as EventListener);
+    return () => {
+      window.removeEventListener('releaseSpot', handleReleaseSpot as EventListener);
+    };
+  }, []);
+
   // Generate available spots for the selected entity
   const generateAvailableSpots = (entityId: string) => {
     const zones = ["A", "B", "C", "D"];
